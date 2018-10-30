@@ -1,11 +1,12 @@
-import os, sys, time, math, cv2, imutils, face_recognition, pickle, queue, threading
+import os, sys, time, math, cv2, imutils, face_recognition, pickle, queue, threading, numpy
 
 DIST_THRESHOLD = .6
 NUM_THREADS = 8
 
 knn_clf = pickle.load(open('thot_model.clf', 'rb'))
-video = cv2.VideoCapture("tests/test.mp4")
+video = cv2.VideoCapture("tests/test3.mp4")
 if not video:
+  print("Failed to open video...")
   sys.exit(-1)
 fps = math.ceil(video.get(cv2.CAP_PROP_FPS))
 
@@ -13,6 +14,7 @@ q = queue.Queue(maxsize=NUM_THREADS)
 q_lock = threading.Lock()
 
 thots_found = {}
+valid_faces = 0
 
 def queue_job(worker):
   X_img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -27,11 +29,12 @@ def queue_job(worker):
   are_matches = [closest_distances[0][i][0] <= DIST_THRESHOLD for i in range(len(X_face_locations))]
 
   with q_lock:
-    for x in [(pred, loc) if rec else ('Unknown', loc) for pred, loc, rec in zip(knn_clf.predict(faces_encodings), X_face_locations, are_matches)]:
+    for x in [(pred, loc) if rec else (None, loc) for pred, loc, rec in zip(knn_clf.predict(faces_encodings), X_face_locations, are_matches)]:
       y = x[0]
-      if not y in thots_found:
-        thots_found[y] = 0
-      thots_found[y] += 1
+      if y:
+        if not y in thots_found:
+          thots_found[y] = 0
+        thots_found[y] += 1
 
 
 def queue_worker():
@@ -43,8 +46,6 @@ for _ in range(NUM_THREADS):
   t = threading.Thread(target=queue_worker)
   t.daemon = True
   t.start()
-
-start = time.time()
 
 skip_frames = 0
 while True:
@@ -60,6 +61,7 @@ while True:
 
 q.join()
 
-print(thots_found)
-
-print(time.time() - start)
+quarter_total_faces = (sum(thots_found.values()) / 2) / 2
+for thot, total in thots_found.items():
+  if total > quarter_total_faces:
+    print(thot)
