@@ -2,4 +2,5 @@
 *.pickle
 *.mp4
 .DS_Store
-
+thots/
+*.clf

@@ -1,8 +1,7 @@
 from requests_html import HTMLSession
-import sys, os, re, time, cv2, face_recognition, pickle
+import sys, os, re, time, cv2, face_recognition, threading, Queue
 
 img_url_re = re.compile(r'https:\/\/ci\.phncdn\.com\/pics\/pornstars\/\d{3}\/\d{3}\/\d{3}\/\(\S+\)thumb_\d+\.jpg')
-session = HTMLSession()
 
 def generate_url(name):
     return "https://www.pornhub.com/pornstar/{}/official_photos".format(name.lower().replace(' ', '-'))
@@ -27,50 +26,52 @@ def get_image_urls(session, url, try_again=True):
             return None
     return imgs
 
-def download_images(session, urls):
+def download_images(session, thot, urls):
     ret = []
     for url in urls:
         r = session.get(url, stream=True)
         if r.status_code == 200:
-            url = "/tmp/{}".format(url.split('_')[-1])
             try:
-                with open(url, 'wb') as f:
+                path = "thots/" + name + "/"
+                if not os.path.exists(path):
+                    os.makedirs(path)
+                path += url.split('_')[-1]
+
+                with open(path, 'wb') as f:
                     for chunk in r.iter_content(1024):
                         f.write(chunk)
-                ret.append(url)
+
+                if len(face_recognition.face_locations(cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2RGB), model="cnn")) == 1:
+                    ret.append(path)
+                else:
+                    os.remove(path)
             except:
                 pass
     return ret
 
+session = HTMLSession()
+
+if not os.path.exists("thots"):
+    os.makedirs("thots")
+
 thot_map = {}
 for name in sys.stdin:
     name = name.rstrip()
+    if os.path.exists("thots/" + name):
+        continue
     print("Downloading images for: {}".format(name))
     url = generate_url(name)
     urls = get_image_urls(session, url)
     if not urls:
         print("Failed to get results for: {}".format(name))
     else:
-        imgs = download_images(session, urls)
+        imgs = download_images(session, name, urls)
         if not imgs:
             print("Failed to get results for: {}".format(name))
+            os.rmdir(name)
         else:
             print("Downloaded {} of {} images for: {}".format(len(imgs), len(urls), name))
             thot_map[name] = imgs
+    time.sleep(1)
 session.close()
 
-encodings, names = [], []
-for k,v in thot_map.items():
-    for vv in v:
-        img = cv2.imread(vv)
-        rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        locations = face_recognition.face_locations(rgb, model="cnn")
-        if len(locations) == 1:
-            encodings.append(face_recognition.face_encodings(rgb, locations)[0])
-            names.append(k)
-        os.remove(vv)
-
-print("Encoding data to thot_data.pickle...")
-data = { "encodings": encodings, "names": names }
-with open("thot_data.pickle", "wb") as f:
-    f.write(pickle.dumps(data))
