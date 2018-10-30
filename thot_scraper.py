@@ -1,5 +1,5 @@
 from requests_html import HTMLSession
-import sys, os, re, time, cv2, face_recognition, threading, Queue
+import sys, os, re, time, cv2, face_recognition
 
 img_url_re = re.compile(r'https:\/\/ci\.phncdn\.com\/pics\/pornstars\/\d{3}\/\d{3}\/\d{3}\/\(\S+\)thumb_\d+\.jpg')
 

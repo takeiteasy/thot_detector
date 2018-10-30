@@ -3,4 +3,5 @@
 *.mp4
 .DS_Store
 thots/
+tests/
 *.clf
