@@ -4,7 +4,7 @@ DIST_THRESHOLD = .6
 NUM_THREADS = 8
 
 knn_clf = pickle.load(open('thot_model.clf', 'rb'))
-video = cv2.VideoCapture("tests/test3.mp4")
+video = cv2.VideoCapture(sys.argv[0])
 if not video:
   print("Failed to open video...")
   sys.exit(-1)
