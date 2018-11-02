@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Thot Detector</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <link rel="shortcut icon" href="/static/favicon.ico" />
+  </head>
+  <body>
+    <center>
+      <h1>Thot Detector</h1>
+      <p><i>If she breathes, she's a <b>THOT</b></i></p>
+      <br/>
+      <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="image" id="image">
+        <input type="submit" value="Upload Image" name="submit">
+      </form>
+      {% if init %}
+        <br/><br/>
+        {% if pedo %}
+          <h1>GET OUT OF HERE, PEDO</h1>
+        {% elif invalid %}
+          <h1>INVALID IMAGE, TRY AGAIN</h1>
+        {% else %}
+          <h1>
+            THOT STATUS:
+            {% if thot %}
+              DETECTED
+              <br/>
+              "{{ thot }}"
+            {% else %}
+              Undetected
+            {% endif %}
+          <h1/>
+          <img src="/uploads/{{ path }}" />
+        {% endif %}
+      {% endif %}
+    </center>
+  </body>
+</html>
