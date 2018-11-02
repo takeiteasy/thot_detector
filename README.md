@@ -13,7 +13,7 @@ Might want to install dlib manually and build with GPU enabled to make stuff a b
 ### Screenshot
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/takeiteasy/thot_detector/master/screenshots/screenshot.png">
+  <img src="https://raw.githubusercontent.com/takeiteasy/thot_detector/master/screenshot.png">
 </p>
 
 
