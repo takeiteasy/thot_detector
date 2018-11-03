@@ -2,6 +2,8 @@
 
 Testing out ```face_recognition``` module for Python. To run, clone, add names to ```thots.txt``` and then run thot_trainer.py to create ```thot_model.clf```. Then run the Flask app ```thot_detector.py``` and go to http://127.0.0.1:5000.
 
+Uses images scraped from Pornhub as training material.
+
 ### Requirements:
 ```
 pip3 install cv2 imutils dlib face_recognition numpy flask scikit-learn requests_html
